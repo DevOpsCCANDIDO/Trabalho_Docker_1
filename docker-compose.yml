@@ -28,7 +28,9 @@ services:
     restart: unless-stopped
 
   nginx:
-    build: ./nginx
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
     ports:
       - '8080:80'
     depends_on:
