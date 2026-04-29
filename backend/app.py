@@ -27,9 +27,24 @@ def decode_secret(b64: str) -> str:
     return base64.b64decode(b64.encode()).decode()
 
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
+try:
+    before_first = app.before_first_request
+except AttributeError:
+    _db_init_done = {"done": False}
+
+    def _create_tables_once():
+        if not _db_init_done["done"]:
+            try:
+                db.create_all()
+            except Exception:
+                pass
+            _db_init_done["done"] = True
+
+    app.before_request(_create_tables_once)
+else:
+    @before_first
+    def create_tables():
+        db.create_all()
 
 
 @app.route('/health')
